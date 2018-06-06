@@ -10,7 +10,7 @@ PImage block2;
 PImage erase;
 boolean show = false;
 boolean typing = level_name.equals("");
-boolean showvalue = true;
+boolean placingPlayer = false;
 String directory = "level.data";
 int scene = 0;
 
@@ -23,6 +23,7 @@ gui type_toggle;
 gui icount;
 gui size_scr;
 gui next;
+gui back;
 
 
 public void guiSetup()
@@ -38,20 +39,26 @@ public void guiSetup()
   int w = width;
   int h = height;
 
-  newlevel    = new gui(w/4,  0+h/4, 3*w/4, 1*h/2-10, false, black, black);
+  newlevel    = new gui(w/4, 00+h/4, 3*w/4, 1*h/2-10, false, black, black);
   inport      = new gui(w/4, 10+h/2, 3*w/4, 3*h/4-00, false, black, black);
   export      = new gui(w/10, 13*h/15, 9*w/20, 19*h/20, false, white, white);
   level_text  = new gui(w/25, h/5, level_name, 60, white);
   icount      = new gui(9*w/40+3*w/10, 19*h/40+7*h/15, "0", 30, white);
   size_scr    = new gui(w/4, 2*h/3, 3*w/4, 2*h/3, 30, 1, 1000, true, white);
-  next        = new gui(7*w/8, 7*h/8, 99*w/100, 99*h/100, false, green, green);
+  next        = new gui(7*w/8, 29*h/32, 99*w/100, 99*h/100, false, green, green);
+  back        = new gui(1*w/100, 1*h/100,  1*w/8, 3*h/32, false, red, red);
   type_toggle = new gui(3*w/5, 13*h/15, 19*w/20, 19*h/20, true, red, randomColor());
 
   type_toggle.enabled = 1;
+  size_scr.enabled = width/size_scr.maxvalue;
+  size_scr.showvalue = true;
   newlevel.text = "New Level";
   inport.text   = "Import";
   export.text   = "Export";
   next.text     = "Create";
+  back.text     = "Cancel";
+
+  next.size = back.size = 18;
 }
 
 public void guiDraw()
@@ -71,6 +78,7 @@ public void guiDraw()
   {
     size_scr.show();
     next.show();
+    back.show();
   }
   else if(scene == 2)
   {
@@ -152,6 +160,11 @@ public void mousePressed()
       level_size = round(size_scr.getValue());
       scene = 2;
     }
+
+    if(back.mouseOnTop)
+    {
+      scene = 0;
+    }
   }
   else if(scene == 2)
   {
@@ -163,8 +176,8 @@ public void mousePressed()
       int px = getMouseX();
       int py = getMouseY();
 
-      level[index] = new tile(px, py, type_toggle.enabled == 1);
-      for(int p = 0; p < index; p++) if(level[p].x == px && level[p].y == py) level[index--] = null;
+      level[index] = new tile(px, py, type_toggle.enabled == 1, index);
+      for(int p = 0; p < index; p++) if(level[p] != null && level[p].x == px && level[p].y == py) level[index--] = null;
       index++;
     }
   }
@@ -233,7 +246,8 @@ void importLevel()
 
       boolean killOnTouch = StringValue(raw_data[i+5]) == 1;
 
-      level[id++] = new tile(x, y, killOnTouch, fx, fy);
+      level[id] = new tile(x, y, killOnTouch, fx, fy, id);
+      id++;
     }
   }
 
@@ -255,7 +269,7 @@ class gui
   int size = 20;
 
   boolean mouseOnTop;
-  boolean isToggle;
+  boolean isToggle, showvalue;
   boolean mouselocked, showline;
 
   float enabled;

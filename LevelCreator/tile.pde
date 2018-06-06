@@ -2,6 +2,8 @@ color[] palette = {color(170,82,237), color(244, 244, 244), color(255, 255, 51),
 
 class tile
 {
+  int id;
+
   int x;
   int y;
 
@@ -13,8 +15,10 @@ class tile
 
   color col;
 
-  tile(int x, int y, boolean killOnTouch)
+  tile(int x, int y, boolean killOnTouch, int id)
   {
+    this.id = id;
+
     interactable = false;
     this.killOnTouch = killOnTouch;
 
@@ -24,8 +28,10 @@ class tile
     col = killOnTouch ? color(244, 15, 15) : palette[int(random(palette.length))];
   }
 
-  tile(int x, int y, boolean killOnTouch, int fx, int fy)
+  tile(int x, int y, boolean killOnTouch, int fx, int fy, int id)
   {
+    this.id = id;
+
     this.x = x;
     this.y = y;
 
@@ -34,7 +40,7 @@ class tile
 
     this.killOnTouch = killOnTouch;
     interactable = true;
-    
+
     col = killOnTouch ? color(244, 15, 15) : palette[int(random(palette.length))];
 
     if(fx == x && fy == y) interactable = false;

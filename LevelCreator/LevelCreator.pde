@@ -19,7 +19,6 @@ void setup()
   cameraY = height/2;
 
   level = new tile[level_size*level_size];
-
 }
 
 void mouseDragged()
@@ -31,19 +30,35 @@ void mouseDragged()
 
     if(type_toggle.enabled != 0)
     {
-      level[index] = new tile(px, py, type_toggle.enabled == 1);
-      for(int p = 0; p < index; p++) if(level[p].x == px && level[p].y == py) level[index--] = null;
+      level[index] = new tile(px, py, type_toggle.enabled == 1, index);
+      for(int p = 0; p < index; p++) if(level[p] != null && level[p].x == px && level[p].y == py) level[index--] = null;
       index++;
-    } else if(type_toggle.enabled == 0)
+    }
+    else if(type_toggle.enabled == 0)
     {
       for(int i = 0; i < index; i++)
-        if(px == level[i].x && py == level[i].y)
+      {
+        if(level[i].x == px && level[i].y == py)
         {
-          println("index: " + index--);
-          level[i] = null;
+          pushArray(i);
+          index--;
+          break;
         }
-
+      }
     }
+
+  }
+}
+
+
+void pushArray(int pos)
+{
+  if(pos >= level.length) println("ERROR PUSH ARRAY");
+  if(pos < 0) println("ERROR PUSH ARRAY");
+
+  for(int i = pos; i < level.length-1; i++)
+  {
+    if(level[i+1] != null) level[i] = level[i+1];
   }
 }
 
@@ -67,7 +82,7 @@ void draw()
 int getMouseX() {
   int x_ = mouseX;
 
-  x_ = floor(map(x_, 0, width, 0, level_size)/(10));
+  x_ = round(map(x_, 0, width, 0, level_size)/(10));
   x_ *= (10);
   return x_;
 }
@@ -75,7 +90,7 @@ int getMouseX() {
 int getMouseY() {
   int y_ = mouseY;
 
-  y_ = floor(map(y_, 0, height, 0, level_size)/(10));
+  y_ = round(map(y_, 0, height, 0, level_size)/(10));
   y_ *= (10);
   return y_;
 }
