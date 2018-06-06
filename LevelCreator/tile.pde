@@ -1,4 +1,4 @@
-color[] palette = {color(170,82,237), color(11, 11, 11), color(244, 244, 244), color(255, 255, 51), color(11, 11, 244, color(11, 244, 11))};
+color[] palette = {color(170,82,237), color(244, 244, 244), color(255, 255, 51), color(11, 11, 244), color(11, 244, 11)};
 
 class tile
 {
@@ -34,16 +34,19 @@ class tile
 
     this.killOnTouch = killOnTouch;
     interactable = true;
+    
     col = killOnTouch ? color(244, 15, 15) : palette[int(random(palette.length))];
+
+    if(fx == x && fy == y) interactable = false;
   }
 
   boolean onScreen(int cameraX, int cameraY)
   {
-    if(this.x < cameraX*zoom-width/10) return false;
-    if(this.x > cameraX*zoom+width/10) return false;
+    if(this.x < cameraX-width/10) return false;
+    if(this.x > cameraX+width/10) return false;
 
-    if(this.y < cameraY*zoom-height/10) return false;
-    if(this.y > cameraY*zoom+height/10) return false;
+    if(this.y < cameraY-height/10) return false;
+    if(this.y > cameraY+height/10) return false;
 
 
     return true;
@@ -53,13 +56,13 @@ class tile
   {
     if(onScreen(cameraX, cameraY) || true)
     {
-      float si = user_width*zoom/width;
+      float si = 10*width/level_size;
 
       stroke(col);
       fill(col, 70);
 
-      int x = round(map(this.x, 0, user_width*zoom, 0, width));
-      int y = round(map(this.y, 0, user_height*zoom, 0, height));
+      int x = round(map(this.x, 0, level_size, 0, width));
+      int y = round(map(this.y, 0, level_size, 0, height));
 
       rect(x-si/2, y-si/2, x+si/2, y+si/2);
     }
