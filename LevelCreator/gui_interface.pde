@@ -10,7 +10,6 @@ PImage block2;
 PImage erase;
 boolean show = false;
 boolean typing = level_name.equals("");
-boolean placingPlayer = false;
 String directory = "level.data";
 int scene = 0;
 
@@ -46,7 +45,7 @@ public void guiSetup()
   icount      = new gui(9*w/40+3*w/10, 19*h/40+7*h/15, "0", 30, white);
   size_scr    = new gui(w/4, 2*h/3, 3*w/4, 2*h/3, 30, 1, 1000, true, white);
   next        = new gui(7*w/8, 29*h/32, 99*w/100, 99*h/100, false, green, green);
-  back        = new gui(1*w/100, 1*h/100,  1*w/8, 3*h/32, false, red, red);
+  back        = new gui(1*w/100, 1*h/100, 1*w/8, 3*h/32, false, red, red);
   type_toggle = new gui(3*w/5, 13*h/15, 19*w/20, 19*h/20, true, red, randomColor());
 
   type_toggle.enabled = 1;
@@ -68,29 +67,27 @@ public void guiDraw()
   int w = width;
   int h = height;
 
-  if(scene == 0)
+  if (scene == 0)
   {
-    image(block, width/2, height/2, width, height);
+    image(loadImage("textures/oldblock.tif"), width/2, height/2, width, height);
     inport.show();
     newlevel.show();
-  }
-  else if(scene == 1)
+  } else if (scene == 1)
   {
     size_scr.show();
     next.show();
     back.show();
-  }
-  else if(scene == 2)
+  } else if (scene == 2)
   {
     textAlign(LEFT);
     level_text.show();
-    if(typing)
+    if (typing)
     {
       level_text.text = level_name;
-      if(frameCount % 120 >= 60) level_text.text += "_";
+      if (frameCount % 120 >= 60) level_text.text += "_";
     }
 
-    if(show)
+    if (show)
     {
       textAlign(CENTER);
       icount.text = str(index);
@@ -104,39 +101,43 @@ public void guiDraw()
       stroke(0);
       noFill();
       rect(mx-21, my-21, mx+20, my+20);
-      if(type_toggle.enabled == 1)   image(block2, mx, my, 40, 40);
-      if(type_toggle.enabled == 0.5) image(block, mx, my, 40, 40);
-      if(type_toggle.enabled == 0)   image(erase, mx, my, 40, 40);
-
+      if (type_toggle.enabled == 1)     image(block2, mx, my, 40, 40);
+      if (type_toggle.enabled == 0.7)   image(block, mx, my, 40, 40);
+      if (rounded(type_toggle.enabled, 2) == 0.4)   image(erase, mx, my, 40, 40);
+      //if(type_toggle.enabled == 0.1)   image(erase, mx, my, 40, 40);
     }
   }
 }
 
 public void keyPressed()
 {
-  if(scene == 2)
+  if (scene == 2)
   {
-    if(key == 's' && !typing) show = !show;
-    else if(key == 'm' && !typing && type_toggle.enabled == 0) type_toggle.enabled = 1;
-    else if(key == 'm' && !typing) type_toggle.enabled = abs(type_toggle.enabled-.5);
-    else if(key == 'r')
+    if (key == 's' && !typing) show = !show;
+    if (key == 'm' && !typing) type_toggle.enabled = (type_toggle.enabled-.3);
+    if (key == 'm' && !typing && type_toggle.enabled <= 0) type_toggle.enabled = 1;
+    if (key == 'n' && index != 0)
+    {
+      pushArray(index--);
+    }
+    if (key == 'r' && !typing)
     {
       level = new tile[level_size*level_size];
       importLevel();
     }
-    if(keyCode == 10) typing = false; //ENTER
-    if(typing) level_name += key;
-    if(keyCode == 8 && typing) //ERASE / BACK BUTTON
+    if (keyCode == 10) typing = false; //ENTER
+    if (typing) level_name += key;
+    if (keyCode == 8 && typing) //ERASE / BACK BUTTON
     {
       String lev = "";
-      for(int i = 0; i < level_name.length()-2; lev += level_name.charAt(i++));
-        level_name = lev;
+      for (int i = 0; i < level_name.length()-2; lev += level_name.charAt(i++));
+      level_name = lev;
     }
 
-    if(key == 'c' && !typing) typing = true;
+    if (key == 'c' && !typing) typing = true;
   }
 
-  if(key == 'o') for(int i = 0; i < index; println(level[i].x, level[i++].y));
+  if (key == 'o') for (int i = 0; i < index; println(level[i].x, level[i++].y));
 
   //println(keyCode);
 }
@@ -144,41 +145,43 @@ public void keyPressed()
 
 public void mousePressed()
 {
-  if(scene == 0)
+  if (scene == 0)
   {
-    if(newlevel.mouseOnTop) scene = 1;
-    else if(inport.mouseOnTop)
+    if (newlevel.mouseOnTop) scene = 1;
+    else if (inport.mouseOnTop)
     {
       importLevel();
       scene = 2;
     }
-  }
-  else if(scene == 1)
+  } else if (scene == 1)
   {
-    if(next.mouseOnTop)
+    if (next.mouseOnTop)
     {
       level_size = round(size_scr.getValue());
       scene = 2;
     }
 
-    if(back.mouseOnTop)
+    if (back.mouseOnTop)
     {
       scene = 0;
     }
-  }
-  else if(scene == 2)
+  } else if (scene == 2)
   {
-    if(export.mouseOnTop) export();
-    else if(type_toggle.mouseOnTop && type_toggle.enabled == 0) type_toggle.enabled = 1;
-    else if(type_toggle.mouseOnTop) type_toggle.enabled = abs(type_toggle.enabled-.5);
-    else if(type_toggle.enabled != 0)
+    if (export.mouseOnTop) export();
+    if (type_toggle.mouseOnTop && type_toggle.enabled <= 0) type_toggle.enabled = 1;
+    if (type_toggle.mouseOnTop) type_toggle.enabled = (type_toggle.enabled-.3);
+    else if (type_toggle.enabled == 0.7 || type_toggle.enabled == 1)
     {
       int px = getMouseX();
       int py = getMouseY();
 
       level[index] = new tile(px, py, type_toggle.enabled == 1, index);
-      for(int p = 0; p < index; p++) if(level[p] != null && level[p].x == px && level[p].y == py) level[index--] = null;
+      for (int p = 0; p < index; p++) if (level[p] != null && level[p].x == px && level[p].y == py) level[index--] = null;
       index++;
+    } else if (rounded(type_toggle.enabled, 2) == 0.1)
+    {
+      playerX = getMouseX();
+      playerY = getMouseY();
     }
   }
 }
@@ -187,15 +190,19 @@ public void mousePressed()
 void export()
 {
   /*EXPORT LEVEL*/
-  String[] file = new String[8*index+3];
+  String[] file = new String[8*index+7];
 
   file[0] = level_name;
   file[1] = str(level_size);
-  file[2] = "";
+  file[2] = "{";
+  file[3] = " " + playerX;
+  file[4] = " " + playerY;
+  file[5] = "}";
+  file[6] = "";
 
-  for(int i = 0; i < index; i++)
+  for (int i = 0; i < index; i++)
   {
-    int in = 8*i+3;
+    int in = 8*i+7;
     file[in+0] = "{";
     file[in+1] = " " + level[i].x;
     file[in+2] = " " + level[i].y;
@@ -214,7 +221,7 @@ void export()
 int StringValue(String data)
 {
   int value = 0;
-  for(int i = 1; i < data.length(); i++)
+  for (int i = 1; i < data.length(); i++)
   {
     value *= 10;
     value += int(data.charAt(i)) -48;
@@ -232,9 +239,9 @@ void importLevel()
 
   level = new tile[dimensions*dimensions];
 
-  for(int i = 3; i < raw_data.length; i++)
+  for (int i = 3; i < raw_data.length; i++)
   {
-    if(raw_data[i].equals("{"))
+    if (raw_data[i].equals("{"))
     {
       int x  = StringValue(raw_data[i+1]);
       int y  = StringValue(raw_data[i+2]);
@@ -252,13 +259,17 @@ void importLevel()
   }
 
   index = id;
-
 }
 
 
 int randomColor()
 {
   return palette[int(random(palette.length))];
+}
+
+int inverseColor(color col)
+{
+  return color(255, 255, 255) - col;
 }
 
 
@@ -291,20 +302,19 @@ class gui
     this.colorOff = (colOff);
     type = 1;
 
-    if(px < x)
+    if (px < x)
     {
       int temp = x;
       x = px;
       px = temp;
     }
 
-    if(py < y)
+    if (py < y)
     {
       int temp = y;
       y = py;
       py = temp;
     }
-
   }
 
   public gui(int x, int y, String text, int size, color defaultColor)
@@ -346,28 +356,27 @@ class gui
       noFill();
       color col = int(this.enabled * colorOn + abs(this.enabled-1) * colorOff);
 
-      if(mouseOnTop) fill(col, 150);
+      if (mouseOnTop) fill(col, 150);
       else fill(col, 100);
 
       rect(x, y, px, py);
 
-      if(text != null)
+      if (text != null)
       {
         float mx = (x+px)/2;
         float my = (y+py)/2;
 
         textAlign(CENTER);
-        fill(defaultColor);
+        fill(inverseColor(defaultColor));
         textSize(size);
         text(text, mx, my);
       }
-
-    } else if(type == 2 && text != null)
+    } else if (type == 2 && text != null)
     {
       fill(defaultColor);
       textSize(size);
       text(text, x, y);
-    } else if(type == 3)
+    } else if (type == 3)
     {
       stroke(defaultColor);
       fill(defaultColor);
@@ -376,7 +385,7 @@ class gui
       float posx = map(enabled, 0, 1, x, px);
       int posy = y-(size/2);
       strokeWeight(size * .05);
-      if(showline) line(x, y, px, py);
+      if (showline) line(x, y, px, py);
       strokeWeight(1);
 
       //ellipse(posx, y, size, size);
@@ -384,52 +393,50 @@ class gui
       stroke(0);
       rect(posx, posy, posx+size, posy+size);
 
-      if(dist(mouseX, mouseY, posx, y) < size) mouseOnTop = true;
+      if (dist(mouseX, mouseY, posx, y) < size) mouseOnTop = true;
       else mouseOnTop = false;
 
-      if(mousePressed && mouseOnTop)
+      if (mousePressed && mouseOnTop)
         mouselocked = true;
 
-      if(!mousePressed)
+      if (!mousePressed)
         mouselocked = false;
 
-      if(mouselocked)
+      if (mouselocked)
       {
         enabled = map(mouseX, x, px, 0, 1);
         enabled = constrain(enabled, 0, 1);
       }
 
-      if(this.text != null)
+      if (this.text != null)
       {
         textAlign(CENTER);
         text(text, x, y);
       }
 
-      if(showvalue)
+      if (showvalue)
       {
         fill(0);
         textSize(12);
         textAlign(CENTER);
         text(round(getValue()), posx+size/2, y+size/5);
       }
-
     }
     //if(type == 1) println(x, y, px, py);
-    if(x <= mouseX && mouseX <= px && y <= mouseY && mouseY <= py)
+    if (x <= mouseX && mouseX <= px && y <= mouseY && mouseY <= py)
       mouseOnTop =    true;
     else mouseOnTop = false;
 
 
 
-    if(enabled == 1 && !isToggle && type == 1) enabled = 0;
+    if (enabled == 1 && !isToggle && type == 1) enabled = 0;
   }
 
   float getValue()
   {
-    if(type == 3) return (this.enabled*(maxvalue-minvalue) + minvalue);
+    if (type == 3) return (this.enabled*(maxvalue-minvalue) + minvalue);
     else return 0;
   }
-
 }
 
 

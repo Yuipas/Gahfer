@@ -2,6 +2,8 @@
 
 int level_size = 600;
 String level_name = "The Yupi Level";
+int playerX;
+int playerY;
 
 //float zoom = 1;
 //int size = 0;
@@ -28,13 +30,13 @@ void mouseDragged()
     int px = getMouseX();
     int py = getMouseY();
 
-    if(type_toggle.enabled != 0)
+    if(type_toggle.enabled == 1 || type_toggle.enabled == 0.7)
     {
       level[index] = new tile(px, py, type_toggle.enabled == 1, index);
       for(int p = 0; p < index; p++) if(level[p] != null && level[p].x == px && level[p].y == py) level[index--] = null;
       index++;
     }
-    else if(type_toggle.enabled == 0)
+    else if(rounded(type_toggle.enabled, 2) == 0.4)
     {
       for(int i = 0; i < index; i++)
       {
@@ -45,8 +47,7 @@ void mouseDragged()
           break;
         }
       }
-    }
-
+    } 
   }
 }
 
